@@ -4,19 +4,15 @@ import css from './ImageGalleryItem.module.css';
 export const ImageGalleryItem = ({ images, togleModal }) => {
   return (
     <>
-      {images.map(item => (
+      {images.map(({ id, webformatURL, largeImageURL, tags }) => (
         <li
-          key={item.id}
-          onClick={event => {
-            togleModal(item.largeImageURL, item.tags);
+          key={id}
+          onClick={() => {
+            togleModal(largeImageURL, tags);
           }}
           className={css.GalleryItem}
         >
-          <img
-            className={css.ImageGalleryItem}
-            src={item.webformatURL}
-            alt={item.tags}
-          />
+          <img className={css.ImageGalleryItem} src={webformatURL} alt={tags} />
         </li>
       ))}
     </>

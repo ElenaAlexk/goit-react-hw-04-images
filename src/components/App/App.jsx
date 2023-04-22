@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import css from './App.module.css';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -9,16 +9,16 @@ import { Loader } from '../Loader/Loader';
 import { Button } from '../Button/Button';
 import { Modal } from '../Modal/Modal';
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    isLoading: false,
-    page: 1,
-    totalHits: '',
-    error: null,
-    showModal: false,
-  };
+export const App = () => {
+  const [images, setImages] = useState([]);
+  const [query, setQuery] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [totalHits, setTotalHits] = useState('');
+  const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
+
 
   //Виклик ф-ції після монтування. перевірка пропсів query i page//
   componentDidUpdate(_, prevState) {
@@ -52,8 +52,8 @@ export class App extends Component {
   };
 
   //ф-ція по кліку на кнопку Load More//
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+  const handleLoadMore = () => {
+    setPage(prevState => prevState.page + 1);
   };
 
   //виклик ф-ції при натисканні на кнопку search//
@@ -69,20 +69,20 @@ export class App extends Component {
     this.setState({ largeImageURL, showModal: true });
   };
 
-  closeModal = () => {
+  onCloseModal = () => {
     this.setState({ showModal: false });
   };
 
-  render() {
-    const {
-      page,
-      images,
-      isLoading,
-      totalHits,
-      largeImageURL,
-      alt,
-      showModal,
-    } = this.state;
+  
+    //const {
+      //page,
+      //images,
+      //isLoading,
+      //totalHits,
+      //largeImageURL,
+      //alt,
+      //showModal,
+    //} = this.state;
     const total = totalHits / 12;
     return (
       <div className={css.App}>
@@ -90,13 +90,13 @@ export class App extends Component {
         <Searchbar onSubmit={this.handleFormSubmit} />
         <ImageGallery togleModal={this.openModal} images={images} />
         {isLoading && <Loader />}
-        {!isLoading && total > page && <Button onClick={this.handleLoadMore} />}
+        {!isLoading && total > page && <Button onClick={handleLoadMore} />}
         {showModal && (
-          <Modal closeModal={this.closeModal}>
+          <Modal onCloseModal={this.onCloseModal}>
             <img src={largeImageURL} alt={alt} />
           </Modal>
         )}
       </div>
     );
   }
-}
+
