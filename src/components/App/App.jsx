@@ -83,7 +83,7 @@ export const App = () => {
           );
           return;
         }
-        setImages(prevImages => [...prevImages, hits]);
+        setImages(prevImages => [...prevImages, data.hits]);
         setTotalHits(totalHits);
       } catch (error) {
         setError(error);
