@@ -17,86 +17,114 @@ export const App = () => {
   const [totalHits, setTotalHits] = useState('');
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
-
+  const [largeImageURL, setLargeImageUrl] = useState('');
 
   //Виклик ф-ції після монтування. перевірка пропсів query i page//
-  componentDidUpdate(_, prevState) {
-    const { query, page } = this.state;
-    if (prevState.query !== query || prevState.page !== page) {
-      this.getSearch(query, page);
+  //componentDidUpdate(_, prevState) {
+  //const { query, page } = this.state;
+  //if (prevState.query !== query || prevState.page !== page) {
+  //this.getSearch(query, page);
+  //}
+  //}
+
+  //getSearch = (query, page) => {
+  //this.setState({ isLoading: true });
+
+  //запит на сервер//
+  //getImages(query, page)
+  //.then(res => res.json())
+  //.then(({ hits, totalHits }) => {
+  //if (totalHits === 0) {
+  //toast.error('Sorry, there are no images matching your search query.');
+  //}
+  //this.setState(prevState => ({
+  //images: [...prevState.images, ...hits],
+  //totalHits,
+  //}));
+  //})
+  //.catch(error => {
+  //toast.error(`Something went wrong...`);
+  //})
+  //.finally(() => {
+  //this.setState({ isLoading: false });
+  //});
+  //};
+
+  //виклик ф-ції при натисканні на кнопку search//
+  const handleFormSubmit = data => {
+    if (data.query === query) {
+      return;
     }
-  }
-
-  getSearch = (query, page) => {
-    this.setState({ isLoading: true });
-
-    //запит на сервер//
-    getImages(query, page)
-      .then(res => res.json())
-      .then(({ hits, totalHits }) => {
-        if (totalHits === 0) {
-          toast.error('Sorry, there are no images matching your search query.');
-        }
-        this.setState(prevState => ({
-          images: [...prevState.images, ...hits],
-          totalHits,
-        }));
-      })
-      .catch(error => {
-        toast.error(`Something went wrong...`);
-      })
-      .finally(() => {
-        this.setState({ isLoading: false });
-      });
+    setQuery(data.query);
+    setPage(1);
+    setImages([]);
+    setError(null);
   };
 
   //ф-ція по кліку на кнопку Load More//
   const handleLoadMore = () => {
-    setPage(prevState => prevState.page + 1);
+    setPage(prevState => prevState + 1);
   };
 
-  //виклик ф-ції при натисканні на кнопку search//
-  handleFormSubmit = query => {
-    if (query === this.state.query) {
+  useEffect(() => {
+    if (query === '') {
       return;
     }
-    this.setState({ query, page: 1, images: [] });
-  };
+    const fetchImages = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const data = await getImages(query, page);
+        const { hits, totalHits } = data;
+        if (hits.length === 0) {
+          setTotalHits('');
+          setError(
+            toast.error(`Sorry, there are no images matching your search query`)
+          );
+          return;
+        }
+        setImages(prevImages => [...prevImages, hits]);
+        setTotalHits(totalHits);
+      } catch (error) {
+        setError(error);
+        setTotalHits('');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchImages();
+  }, [query, page]);
 
   //відкриття та закритя модального вікна//
-  openModal = largeImageURL => {
-    this.setState({ largeImageURL, showModal: true });
+  const openModal = largeImageURL => {
+    setShowModal(true);
+    setLargeImageUrl(largeImageURL);
   };
 
-  onCloseModal = () => {
-    this.setState({ showModal: false });
+  const onCloseModal = () => {
+    setShowModal(false);
   };
 
-  
-    //const {
-      //page,
-      //images,
-      //isLoading,
-      //totalHits,
-      //largeImageURL,
-      //alt,
-      //showModal,
-    //} = this.state;
-    const total = totalHits / 12;
-    return (
-      <div className={css.App}>
-        <ToastContainer />
-        <Searchbar onSubmit={this.handleFormSubmit} />
-        <ImageGallery togleModal={this.openModal} images={images} />
-        {isLoading && <Loader />}
-        {!isLoading && total > page && <Button onClick={handleLoadMore} />}
-        {showModal && (
-          <Modal onCloseModal={this.onCloseModal}>
-            <img src={largeImageURL} alt={alt} />
-          </Modal>
-        )}
-      </div>
-    );
-  }
-
+  //const {
+  //page,
+  //images,
+  //isLoading,
+  //totalHits,
+  //largeImageURL,
+  //alt,
+  //showModal,
+  //} = this.state;
+  const total = totalHits / 12;
+  return (
+    <div className={css.App}>
+      <ToastContainer />
+      <Searchbar onSubmit={handleFormSubmit} />
+      <ImageGallery togleModal={openModal} images={images} />
+      {isLoading && <Loader />}
+      {!isLoading && total > page && <Button onClick={handleLoadMore} />}
+      {showModal && (
+        <Modal onCloseModal={onCloseModal} largeImageURL={largeImageURL} />
+      )}
+    </div>
+  );
+};
