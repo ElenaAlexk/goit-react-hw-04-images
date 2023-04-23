@@ -4,7 +4,7 @@ import css from './Modal.module.css';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export const Modal = ({ onCloseModal, children }) => {
+export const Modal = ({ onCloseModal, imageUrl, tags }) => {
   useEffect(() => {
     const handleKeyDown = event => {
       if (event.code === 'Escape') {
@@ -24,7 +24,7 @@ export const Modal = ({ onCloseModal, children }) => {
 
   return createPortal(
     <div onClick={handleClose} className={css.Overlay}>
-      <div className={css.Modal}>{children}</div>
+      <img className={css.Modal} src={imageUrl} alt={tags} />
     </div>,
     modalRoot
   );
