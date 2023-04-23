@@ -17,23 +17,13 @@ export const App = () => {
   const [lastPage, setLastPage] = useState(0);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [largeImageURL, setLargeImageUrl] = useState('');
+  const [selectedImage, setSelectedImage] = useState(null);
+  //const [largeImageURL, setLargeImageUrl] = useState('');
 
-  //getSearch = (query, page) => {
-  //this.setState({ isLoading: true });
-
-  //запит на сервер//
-  //getImages(query, page)
-  //.then(res => res.json())
-  //.then(({ hits, totalHits }) => {
-  //if (totalHits === 0) {
-  //toast.error('Sorry, there are no images matching your search query.');
-  //}
-  //this.setState(prevState => ({
-  //images: [...prevState.images, ...hits],
-  //totalHits,
-  //}));
-  //})
+  const onSetSelectedImage = url => {
+    setShowModal(true);
+    setSelectedImage(url);
+  };
 
   //виклик ф-ції при натисканні на кнопку search//
   const handleFormSubmit = query => {
@@ -72,10 +62,10 @@ export const App = () => {
   }, [query, page]);
 
   //відкриття та закритя модального вікна//
-  const openModal = largeImageURL => {
-    setShowModal(true);
-    setLargeImageUrl(largeImageURL);
-  };
+  //const openModal = largeImageURL => {
+  //setShowModal(true);
+  //setLargeImageUrl(largeImageURL);
+  //};
 
   const onCloseModal = () => {
     setShowModal(false);
@@ -86,11 +76,11 @@ export const App = () => {
       <ToastContainer />
       <Searchbar onSubmit={handleFormSubmit} />
       {error && <p>Something went wrong: {error.message}</p>}
-      <ImageGallery togleModal={openModal} images={images} />
+      <ImageGallery onSelect={onSetSelectedImage} images={images} />
       {isLoading && <Loader />}
       {!isLoading && page < lastPage && <Button onClick={handleLoadMore} />}
-      {showModal && (
-        <Modal onCloseModal={onCloseModal} largeImageURL={largeImageURL} />
+      {showModal && selectedImage && (
+        <Modal onCloseModal={onCloseModal} imageUrl={selectedImage} />
       )}
     </div>
   );
