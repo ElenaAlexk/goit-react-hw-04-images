@@ -14,5 +14,5 @@ export const ImageGallery = ({ images, onSelect }) => {
 
 ImageGallery.propTypes = {
   images: PropTypes.arrayOf(PropTypes.object).isRequired,
-  togleModal: PropTypes.func.isRequired,
+  onSelect: PropTypes.func.isRequired,
 };
