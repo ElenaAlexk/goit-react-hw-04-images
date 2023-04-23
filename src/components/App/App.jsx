@@ -14,18 +14,10 @@ export const App = () => {
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
-  const [totalHits, setTotalHits] = useState('');
+  const [lastPage, setLastPage] = useState(0);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [largeImageURL, setLargeImageUrl] = useState('');
-
-  //Виклик ф-ції після монтування. перевірка пропсів query i page//
-  //componentDidUpdate(_, prevState) {
-  //const { query, page } = this.state;
-  //if (prevState.query !== query || prevState.page !== page) {
-  //this.getSearch(query, page);
-  //}
-  //}
 
   //getSearch = (query, page) => {
   //this.setState({ isLoading: true });
@@ -42,20 +34,10 @@ export const App = () => {
   //totalHits,
   //}));
   //})
-  //.catch(error => {
-  //toast.error(`Something went wrong...`);
-  //})
-  //.finally(() => {
-  //this.setState({ isLoading: false });
-  //});
-  //};
 
   //виклик ф-ції при натисканні на кнопку search//
-  const handleFormSubmit = data => {
-    if (data.query === query) {
-      return;
-    }
-    setQuery(data.query);
+  const handleFormSubmit = query => {
+    setQuery(query);
     setPage(1);
     setImages([]);
     setError(null);
@@ -67,31 +49,25 @@ export const App = () => {
   };
 
   useEffect(() => {
-    if (query === '') {
-      return;
-    }
+    if (query === '') return;
+
     const fetchImages = async () => {
+      setIsLoading(true);
+      setError(null);
+
       try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getImages(query, page);
-        const { hits, totalHits } = data;
-        if (hits.length === 0) {
-          setTotalHits('');
-          setError(
-            toast.error(`Sorry, there are no images matching your search query`)
-          );
-          return;
-        }
-        setImages(prevImages => [...prevImages, data.hits]);
-        setTotalHits(totalHits);
+        const response = await getImages(query, page);
+        setImages(prevState => [...prevState, ...response.hits]);
+        setLastPage(Math.ceil(response.totalHits / 12));
+        response.totalHits === 0 &&
+          toast.error(`Sorry, there are no images matching your search query`);
       } catch (error) {
         setError(error);
-        setTotalHits('');
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchImages();
   }, [query, page]);
 
@@ -105,23 +81,14 @@ export const App = () => {
     setShowModal(false);
   };
 
-  //const {
-  //page,
-  //images,
-  //isLoading,
-  //totalHits,
-  //largeImageURL,
-  //alt,
-  //showModal,
-  //} = this.state;
-  const total = totalHits / 12;
   return (
     <div className={css.App}>
       <ToastContainer />
       <Searchbar onSubmit={handleFormSubmit} />
+      {error && <p>Something went wrong: {error.message}</p>}
       <ImageGallery togleModal={openModal} images={images} />
       {isLoading && <Loader />}
-      {!isLoading && total > page && <Button onClick={handleLoadMore} />}
+      {!isLoading && page < lastPage && <Button onClick={handleLoadMore} />}
       {showModal && (
         <Modal onCloseModal={onCloseModal} largeImageURL={largeImageURL} />
       )}
